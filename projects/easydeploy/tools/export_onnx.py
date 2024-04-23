@@ -5,12 +5,15 @@ import warnings
 from io import BytesIO
 from pathlib import Path
 
+from onnxconverter_common import auto_convert_mixed_precision
 import onnx
 import torch
 from mmdet.apis import init_detector
+from mmengine import Config
 from mmengine.config import ConfigDict
 from mmengine.logging import print_log
 from mmengine.utils.path import mkdir_or_exist
+from torch import nn
 
 # Add MMYOLO ROOT to sys.path
 sys.path.append(str(Path(__file__).resolve().parents[3]))
@@ -71,6 +74,10 @@ def parse_args():
         type=float,
         default=0.25,
         help='Score threshold for NMS')
+    parser.add_argument(
+        '--mixed-precision',
+        action='store_true',
+        help='Output mixed-precision onnx model')
     args = parser.parse_args()
     args.img_size *= 2 if len(args.img_size) == 1 else 1
     return args
@@ -80,6 +87,28 @@ def build_model_from_cfg(config_path, checkpoint_path, device):
     model = init_detector(config_path, checkpoint_path, device=device)
     model.eval()
     return model
+
+
+def preprocess(config):
+    data_preprocess = config.get('model', {}).get('data_preprocessor', {})
+    mean = data_preprocess.get('mean', None)
+    std = data_preprocess.get('std', None)
+    if mean is None or std is None:
+        return None
+    mean = torch.tensor(mean, dtype=torch.float32).reshape(1, 3, 1, 1)
+    std = torch.tensor(std, dtype=torch.float32).reshape(1, 3, 1, 1)
+
+    class PreProcess(torch.nn.Module):
+
+        def __init__(self):
+            super().__init__()
+
+        def forward(self, x):
+            x -= mean.to(x.device)
+            x /= std.to(x.device)
+            return x
+
+    return PreProcess().eval()
 
 
 def main():
@@ -108,6 +137,12 @@ def main():
 
     deploy_model = DeployModel(
         baseModel=baseModel, backend=backend, postprocess_cfg=postprocess_cfg)
+
+    cfg = Config.fromfile(args.config)
+    pre_pipeline = preprocess(cfg)
+    if pre_pipeline:
+        deploy_model = nn.Sequential(pre_pipeline, deploy_model)
+
     deploy_model.eval()
 
     fake_input = torch.randn(args.batch_size, 3,
@@ -149,6 +184,9 @@ def main():
             assert check, 'assert check failed'
         except Exception as e:
             print_log(f'Simplify failure: {e}')
+    if args.mixed_precision:
+        freed_dict = {"images": fake_input.cpu().numpy()}
+        onnx_model = auto_convert_mixed_precision(onnx_model, freed_dict, rtol=0.01, atol=0.001, keep_io_types=True)
     onnx.save(onnx_model, save_onnx_path)
     print_log(f'ONNX export success, save into {save_onnx_path}')
 

@@ -47,8 +47,8 @@ def preprocess(config):
 
         def forward(self, x):
             x = x[None].float()
-            x -= mean.to(x.device)
-            x /= std.to(x.device)
+            #x -= mean.to(x.device)
+            #x /= std.to(x.device)
             return x
 
     return PreProcess().eval()

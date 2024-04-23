@@ -2,7 +2,7 @@ _base_ = ['../_base_/default_runtime.py', '../_base_/det_p5_tta.py']
 
 # ========================Frequently modified parameters======================
 # -----data related-----
-data_root = 'data/coco/'
+data_root = 'D:\\MapleStory-ML\\DATA\\410003040-1\\coco\\'  # Root path of data
 # Path of train annotation file
 train_ann_file = 'annotations/instances_train2017.json'
 train_data_prefix = 'train2017/'  # Prefix of train image path
@@ -10,9 +10,11 @@ train_data_prefix = 'train2017/'  # Prefix of train image path
 val_ann_file = 'annotations/instances_val2017.json'
 val_data_prefix = 'val2017/'  # Prefix of val image path
 
-num_classes = 80  # Number of classes for classification
+class_name = ('Mob', 'Player')  # 数据集类别名称
+num_classes = len(class_name)  # Number of classes for classification
+metainfo = dict(classes=class_name, palette=[(20, 220, 60)])
 # Batch size of a single GPU during training
-train_batch_size_per_gpu = 32
+train_batch_size_per_gpu = 16
 # Worker to pre-fetch data for each single GPU during training
 train_num_workers = 10
 # persistent_workers must be False if num_workers is 0.
@@ -20,8 +22,8 @@ persistent_workers = True
 
 # -----train val related-----
 # Base learning rate for optim_wrapper. Corresponding to 8xb16=64 bs
-base_lr = 0.004
-max_epochs = 300  # Maximum training epochs
+base_lr = 0.002
+max_epochs = 100  # Maximum training epochs
 # Change train_pipeline for final 20 epochs (stage 2)
 num_epochs_stage2 = 20
 
@@ -46,7 +48,7 @@ mixup_max_cached_images = 20
 # Dataset type, this will be used to define the dataset
 dataset_type = 'YOLOv5CocoDataset'
 # Batch size of a single GPU during validation
-val_batch_size_per_gpu = 32
+val_batch_size_per_gpu = 24
 # Worker to pre-fetch data for each single GPU during validation
 val_num_workers = 10
 
@@ -77,11 +79,11 @@ qfl_beta = 2.0  # beta of QualityFocalLoss
 weight_decay = 0.05
 
 # Save model checkpoint and validation intervals
-save_checkpoint_intervals = 10
+save_checkpoint_intervals = 1
 # validation intervals in stage 2
 val_interval_stage2 = 1
 # The maximum checkpoints to keep.
-max_keep_ckpts = 3
+max_keep_ckpts = 15
 # single-scale training is recommended to
 # be turned on, which can speed up training.
 env_cfg = dict(cudnn_benchmark=True)
@@ -216,6 +218,7 @@ train_dataloader = dict(
         type=dataset_type,
         data_root=data_root,
         ann_file=train_ann_file,
+        metainfo=metainfo,
         data_prefix=dict(img=train_data_prefix),
         filter_cfg=dict(filter_empty_gt=True, min_size=32),
         pipeline=train_pipeline))
@@ -231,6 +234,7 @@ val_dataloader = dict(
         type=dataset_type,
         data_root=data_root,
         ann_file=val_ann_file,
+        metainfo=metainfo,
         data_prefix=dict(img=val_data_prefix),
         test_mode=True,
         batch_shapes_cfg=batch_shapes_cfg,
@@ -277,7 +281,8 @@ default_hooks = dict(
     checkpoint=dict(
         type='CheckpointHook',
         interval=save_checkpoint_intervals,
-        max_keep_ckpts=max_keep_ckpts  # only keep latest 3 checkpoints
+        max_keep_ckpts=max_keep_ckpts,
+        save_best='auto'
     ))
 
 custom_hooks = [

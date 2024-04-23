@@ -43,7 +43,7 @@ class TRTEfficientNMSop(torch.autograd.Function):
                  score_activation: int = 0,
                  score_threshold: float = 0.25):
         out = g.op(
-            'TRT::EfficientNMS_TRT',
+            'trt.plugins::EfficientNMS_TRT',
             boxes,
             scores,
             background_class_i=background_class,
