@@ -62,9 +62,9 @@ batch_shapes_cfg = dict(
 
 # -----model related-----
 # The scaling factor that controls the depth of the network structure
-deepen_factor = 0.67
+deepen_factor = 1.0
 # The scaling factor that controls the width of the network structure
-widen_factor = 0.75
+widen_factor = 1.0
 # Strides of multi-scale prior box
 strides = [8, 16, 32]
 
