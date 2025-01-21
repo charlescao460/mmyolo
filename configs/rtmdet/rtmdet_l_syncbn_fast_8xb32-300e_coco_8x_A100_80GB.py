@@ -2,7 +2,7 @@ _base_ = ['../_base_/default_runtime.py', '../_base_/det_p5_tta.py']
 
 # ========================Frequently modified parameters======================
 # -----data related-----
-data_root = 'D:\\MapleStory-ML\\DATA\\Arteria\\coco\\'  # Root path of data
+data_root = '/work_dir/Carcion/coco/'  # Root path of data
 # Path of train annotation file
 train_ann_file = 'annotations/instances_train2017.json'
 train_data_prefix = 'train2017/'  # Prefix of train image path
@@ -14,18 +14,18 @@ class_name = ('Mob', 'Player')  # 数据集类别名称
 num_classes = len(class_name)  # Number of classes for classification
 metainfo = dict(classes=class_name, palette=[(20, 220, 60), (100, 100, 20)])
 # Batch size of a single GPU during training
-train_batch_size_per_gpu = 24
+train_batch_size_per_gpu = 112
 # Worker to pre-fetch data for each single GPU during training
-train_num_workers = 10
+train_num_workers = 16
 # persistent_workers must be False if num_workers is 0.
 persistent_workers = True
 
 # -----train val related-----
 # Base learning rate for optim_wrapper. Corresponding to 8xb16=64 bs
 base_lr = 0.003
-max_epochs = 80  # Maximum training epochs
+max_epochs = 30  # Maximum training epochs
 # Change train_pipeline for final 20 epochs (stage 2)
-num_epochs_stage2 = 20
+num_epochs_stage2 = 10
 
 model_test_cfg = dict(
     # The config of multi-label for multi-class prediction.

@@ -92,11 +92,10 @@ def main():
     progress_bar = ProgressBar(len(files))
     for i, file in enumerate(files):
         bgr = mmcv.imread(file)
-        rgb = mmcv.imconvert(bgr, 'bgr', 'rgb')
-        data, samples = test_pipeline(dict(img=rgb, img_id=i)).values()
+        data, samples = test_pipeline(dict(img=bgr, img_id=i)).values()
         pad_param = samples.get('pad_param',
                                 np.array([0, 0, 0, 0], dtype=np.float32))
-        h, w = samples.get('ori_shape', rgb.shape[:2])
+        h, w = samples.get('ori_shape', bgr.shape[:2])
         pad_param = torch.asarray(
             [pad_param[2], pad_param[0], pad_param[2], pad_param[0]],
             device=args.device)
