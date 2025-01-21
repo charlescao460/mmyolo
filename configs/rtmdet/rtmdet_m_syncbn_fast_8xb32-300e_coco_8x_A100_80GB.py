@@ -14,9 +14,9 @@ class_name = ('Mob', 'Player')  # 数据集类别名称
 num_classes = len(class_name)  # Number of classes for classification
 metainfo = dict(classes=class_name, palette=[(20, 220, 60), (100, 100, 20)])
 # Batch size of a single GPU during training
-train_batch_size_per_gpu = 112
+train_batch_size_per_gpu = 56
 # Worker to pre-fetch data for each single GPU during training
-train_num_workers = 16
+train_num_workers = 8
 # persistent_workers must be False if num_workers is 0.
 persistent_workers = True
 
@@ -62,9 +62,9 @@ batch_shapes_cfg = dict(
 
 # -----model related-----
 # The scaling factor that controls the depth of the network structure
-deepen_factor = 1.0
+deepen_factor = 0.67
 # The scaling factor that controls the width of the network structure
-widen_factor = 1.0
+widen_factor = 0.75
 # Strides of multi-scale prior box
 strides = [8, 16, 32]
 
