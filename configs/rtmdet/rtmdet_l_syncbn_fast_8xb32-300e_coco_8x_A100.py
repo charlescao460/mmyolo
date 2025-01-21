@@ -14,15 +14,15 @@ class_name = ('Mob', 'Player')  # 数据集类别名称
 num_classes = len(class_name)  # Number of classes for classification
 metainfo = dict(classes=class_name, palette=[(20, 220, 60), (100, 100, 20)])
 # Batch size of a single GPU during training
-train_batch_size_per_gpu = 56
+train_batch_size_per_gpu = 64
 # Worker to pre-fetch data for each single GPU during training
-train_num_workers = 8
+train_num_workers = 15
 # persistent_workers must be False if num_workers is 0.
 persistent_workers = True
 
 # -----train val related-----
 # Base learning rate for optim_wrapper. Corresponding to 8xb16=64 bs
-base_lr = 0.003
+base_lr = 0.008
 max_epochs = 30  # Maximum training epochs
 # Change train_pipeline for final 20 epochs (stage 2)
 num_epochs_stage2 = 10
